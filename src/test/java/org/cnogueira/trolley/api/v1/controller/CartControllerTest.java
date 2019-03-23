@@ -2,6 +2,7 @@ package org.cnogueira.trolley.api.v1.controller;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,5 +53,23 @@ public class CartControllerTest {
         response.andExpect(status().is(HttpStatus.CREATED.value()))
                 .andExpect(jsonPath("id").value(cart.getId().toString()))
                 .andExpect(jsonPath("name").value(cartRequestBody.getName()));
+    }
+
+    @Test
+    public void getCart_delegatesToCartService() throws Exception {
+        // given
+        val cart = Cart.builder()
+                .id(UUID.randomUUID())
+                .name("some name")
+                .build();
+        given(cartService.getCart(eq(cart.getId()))).willReturn(cart);
+
+        // when
+        val response = mockMvc.perform(get(CARTS_API + "/" + cart.getId()));
+
+        // then
+        response.andExpect(status().is(HttpStatus.OK.value()))
+                .andExpect(jsonPath("id").value(cart.getId().toString()))
+                .andExpect(jsonPath("name").value(cart.getName()));
     }
 }
