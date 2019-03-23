@@ -3,8 +3,9 @@ package org.cnogueira.trolley.api.v1.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.TestUtils;
-import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
+import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
+import org.cnogueira.trolley.api.v1.domain.factory.impl.DefaultCartFactory;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.cnogueira.trolley.api.v1.exceptions.CartNotFoundException;
@@ -45,11 +46,13 @@ public class CartControllerTest {
     @MockBean
     private CartService cartService;
 
+    private CartFactory cartFactory = new DefaultCartFactory();
+
     @Test
     public void createCart_delegatesToCartService() throws Exception {
         // given
         val cartRequestBody = CartCreateRequest.withName("a name for the cart");
-        val cart = Cart.from(cartRequestBody);
+        val cart = cartFactory.from(cartRequestBody);
         given(cartService.createCart(eq(cartRequestBody))).willReturn(cart);
 
         // when

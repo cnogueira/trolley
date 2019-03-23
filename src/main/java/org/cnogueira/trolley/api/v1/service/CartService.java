@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
+import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.cnogueira.trolley.api.v1.exceptions.CartNotFoundException;
@@ -19,11 +20,13 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final ItemRepository itemRepository;
+    private final CartFactory cartFactory;
 
     public Cart createCart(final CartCreateRequest cartCreateRequest) {
-        val cart = Cart.from(cartCreateRequest);
+        val cart = cartFactory.from(cartCreateRequest);
 
         cartRepository.addCart(cart);
+//        cart.addStateChangeObserver(cartRepository);
 
         return cart;
     }

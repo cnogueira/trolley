@@ -2,7 +2,7 @@ package org.cnogueira.trolley.api.v1.service;
 
 import lombok.val;
 import org.cnogueira.trolley.api.v1.TestUtils;
-import org.cnogueira.trolley.api.v1.domain.Cart;
+import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.cnogueira.trolley.api.v1.exceptions.CartNotFoundException;
@@ -38,17 +38,22 @@ public class CartServiceTest {
     @Mock
     private ItemRepository itemRepository;
 
+    @Mock
+    private CartFactory cartFactory;
+
     private CartService cartService;
 
     @Before
     public void setUp() {
-        cartService = new CartService(cartRepository, itemRepository);
+        cartService = new CartService(cartRepository, itemRepository, cartFactory);
     }
 
     @Test
     public void createCart_createsCart_and_AddsItToRepository() {
         // given
         val cartCreateRequest = CartCreateRequest.withName("some name");
+        val cart = spy(TestUtils.createRandomCartWith("some name"));
+        given(cartFactory.from(same(cartCreateRequest))).willReturn(cart);
 
         // when
         val createdCart = cartService.createCart(cartCreateRequest);
@@ -58,15 +63,13 @@ public class CartServiceTest {
         assertThat(createdCart.getId()).isNotNull();
         assertThat(createdCart.getName()).isEqualTo(cartCreateRequest.getName());
         verify(cartRepository, times(1)).addCart(same(createdCart));
+        verify(cart, times(1)).addStateChangeObserver(same(cartRepository));
     }
 
     @Test
-    public void getCart_delegatesToRepository() {
+    public void getCart_delegatesToRepository_and_SubscribesRepository() {
         // given
-        val cart = Cart.builder()
-                .id(UUID.randomUUID())
-                .name("some other name")
-                .build();
+        val cart = TestUtils.createRandomCartWith("some other name");
         given(cartRepository.getById(eq(cart.getId()))).willReturn(Optional.of(cart));
 
         // when
@@ -75,6 +78,7 @@ public class CartServiceTest {
         //then
         assertThat(receivedCart).isSameAs(cart);
         verify(cartRepository, times(1)).getById(eq(cart.getId()));
+        verify(cart, times(1)).addStateChangeObserver(same(cartRepository));
     }
 
     @Test(expected = CartNotFoundException.class)
@@ -108,7 +112,7 @@ public class CartServiceTest {
 
         verify(itemRepository, times(1)).addItem(same(addedItem));
 
-        verify(cartRepository, times(1)).replaceCart(same(cart));
+        verify(cartRepository, times(1)).stateChanged(same(cart));
     }
 
     @Test(expected = CartNotFoundException.class)

@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
+import org.cnogueira.trolley.api.v1.repository.CartRepository;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,18 +32,6 @@ public class Cart {
         return Collections.unmodifiableList(items);
     }
 
-    public static Cart withName(final String cartName) {
-        return Cart.builder()
-            .id(UUID.randomUUID())
-            .name(cartName)
-            .build();
+    public void addStateChangeObserver(final CartRepository cartRepository) {
     }
-
-    public static Cart from(final CartCreateRequest cartCreateRequest) {
-        return Cart.builder()
-                .id(UUID.randomUUID())
-                .name(cartCreateRequest.getName())
-                .build();
-    }
-
 }
