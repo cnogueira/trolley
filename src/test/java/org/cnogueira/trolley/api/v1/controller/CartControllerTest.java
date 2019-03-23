@@ -40,13 +40,8 @@ public class CartControllerTest {
     @Test
     public void createCart_delegatesToCartService() throws Exception {
         // given
-        val cart = Cart.builder()
-                .id(UUID.randomUUID())
-                .name("a name for the cart")
-                .build();
-        val cartRequestBody = CartCreateRequest.builder()
-                .name(cart.getName())
-                .build();
+        val cartRequestBody = CartCreateRequest.withName("a name for the cart");
+        val cart = Cart.from(cartRequestBody);
         given(cartService.createCart(eq(cartRequestBody))).willReturn(cart);
 
         // when
@@ -57,6 +52,6 @@ public class CartControllerTest {
         // then
         response.andExpect(status().is(HttpStatus.CREATED.value()))
                 .andExpect(jsonPath("id").value(cart.getId().toString()))
-                .andExpect(jsonPath("name").value(cart.getName()));
+                .andExpect(jsonPath("name").value(cartRequestBody.getName()));
     }
 }

@@ -31,9 +31,7 @@ public class CartServiceTest {
     @Test
     public void createCart_createsCart_and_AddsItToRepository() {
         // given
-        val cartCreateRequest = CartCreateRequest.builder()
-                .name("some name")
-                .build();
+        val cartCreateRequest = CartCreateRequest.withName("some name");
 
         // when
         val createdCart = cartService.createCart(cartCreateRequest);

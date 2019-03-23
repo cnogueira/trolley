@@ -28,10 +28,7 @@ public class TrolleyApplicationTests {
     @Test
     public void allowsCartCreation() {
         // given
-        val cartName = "Test Cart";
-        val cartCreateRequest = CartCreateRequest.builder()
-                .name(cartName)
-                .build();
+        val cartCreateRequest = CartCreateRequest.withName("Test Cart");
 
         // when
         val createCartResponse = restTemplate.postForEntity("/api/v1/carts", cartCreateRequest, Cart.class);
@@ -39,6 +36,6 @@ public class TrolleyApplicationTests {
         // then
         assertThat(createCartResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(createCartResponse.getBody()).isNotNull();
-        assertThat(createCartResponse.getBody().getName()).isEqualTo(cartName);
+        assertThat(createCartResponse.getBody().getName()).isEqualTo(cartCreateRequest.getName());
     }
 }
