@@ -23,6 +23,16 @@ public class Cart {
     @Builder.Default
     private final List<Item> items = new ArrayList<>();
 
+    public void addItem(final Item item) {
+    }
+
+    public static Cart withName(final String cartName) {
+        return Cart.builder()
+            .id(UUID.randomUUID())
+            .name(cartName)
+            .build();
+    }
+
     public static Cart from(final CartCreateRequest cartCreateRequest) {
         return Cart.builder()
                 .id(UUID.randomUUID())
@@ -30,6 +40,4 @@ public class Cart {
                 .build();
     }
 
-    public void addItem(final Item item) {
-    }
 }
