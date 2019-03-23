@@ -3,9 +3,12 @@ package org.cnogueira.trolley;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import java.util.UUID;
 import lombok.val;
+import org.cnogueira.trolley.api.v1.domain.Cart;
+import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
-import org.cnogueira.trolley.api.v1.dto.Cart;
+import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +40,11 @@ public class TrolleyApplicationTests {
 
         // then
         assertThat(createCartResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(createCartResponse.getBody()).isNotNull();
-        assertThat(createCartResponse.getBody().getName()).isEqualTo(cartCreateRequest.getName());
+
+        val cartFromResponse = createCartResponse.getBody();
+        assertThat(cartFromResponse).isNotNull();
+        assertThat(cartFromResponse.getId()).isNotNull();
+        assertThat(cartFromResponse.getName()).isEqualTo(cartCreateRequest.getName());
     }
 
     @Test
@@ -55,6 +61,28 @@ public class TrolleyApplicationTests {
         assertThat(cartDetailsResponse.getBody()).isEqualTo(cart);
     }
 
+    @Test
+    public void allowsAddingItemsToCart() {
+        // given
+        val cart = createCart("Test Cart with items");
+        val addItemUrl = String.format("%s/%s/items", CARTS_API, cart.getId());
+        val requestBody = ItemAddRequest.withName("Item 1");
+
+        // when
+        val addItemResponse = restTemplate.postForEntity(addItemUrl, requestBody, Item.class);
+        val cartDetails = getCartDetails(cart.getId());
+
+        // then
+        assertThat(addItemResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        val itemFromResponse = addItemResponse.getBody();
+        assertThat(itemFromResponse).isNotNull();
+        assertThat(itemFromResponse.getId()).isNotNull();
+        assertThat(itemFromResponse.getName()).isEqualTo(requestBody.getName());
+
+        assertThat(cartDetails.getItems()).contains(itemFromResponse);
+    }
+
     private Cart createCart(final String cartName) {
         val createCartResponse = restTemplate
                 .postForEntity(CARTS_API, CartCreateRequest.withName(cartName), Cart.class);
@@ -62,4 +90,11 @@ public class TrolleyApplicationTests {
         return createCartResponse.getBody();
     }
 
+    private Cart getCartDetails(final UUID cartId) {
+        val cartDetailsResponse = restTemplate.getForEntity(CARTS_API + "/" + cartId, Cart.class);
+
+        assertThat(cartDetailsResponse.getBody()).isNotNull();
+
+        return cartDetailsResponse.getBody();
+    }
 }

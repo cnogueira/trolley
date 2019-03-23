@@ -1,11 +1,12 @@
 package org.cnogueira.trolley.api.v1.repository;
 
+import org.cnogueira.trolley.api.v1.domain.Cart;
+import org.springframework.stereotype.Repository;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.cnogueira.trolley.api.v1.dto.Cart;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public class CartRepository {
@@ -18,5 +19,9 @@ public class CartRepository {
 
     public Optional<Cart> getById(final UUID cartId) {
         return Optional.ofNullable(carts.get(cartId));
+    }
+
+    public void replaceCart(final Cart cart) {
+        addCart(cart);
     }
 }
