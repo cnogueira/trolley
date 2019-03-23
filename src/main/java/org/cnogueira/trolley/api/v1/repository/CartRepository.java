@@ -22,5 +22,6 @@ public class CartRepository {
     }
 
     public void replaceCart(final Cart cart) {
+        addCart(cart);
     }
 }
