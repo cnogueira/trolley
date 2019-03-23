@@ -8,6 +8,7 @@ import lombok.ToString;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,11 @@ public class Cart {
     private final List<Item> items = new ArrayList<>();
 
     public void addItem(final Item item) {
+        items.add(item);
+    }
+
+    public List<Item> getItems() {
+        return Collections.unmodifiableList(items);
     }
 
     public static Cart withName(final String cartName) {
