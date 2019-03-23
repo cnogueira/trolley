@@ -2,6 +2,7 @@ package org.cnogueira.trolley.api.v1.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.cnogueira.trolley.api.v1.TestUtils;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
@@ -19,12 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -69,7 +66,7 @@ public class CartControllerTest {
     @Test
     public void getCart_delegatesToCartService() throws Exception {
         // given
-        val cart = createRandomCartWith("some name");
+        val cart = TestUtils.createRandomCartWith("some name");
         given(cartService.getCart(eq(cart.getId()))).willReturn(cart);
 
         // when
@@ -110,7 +107,7 @@ public class CartControllerTest {
     @Test
     public void addItem_delegatesToCartService() throws Exception {
         // given
-        val cart = createRandomCartWith("cart name", Arrays.asList("item 1", "item 2"));
+        val cart = TestUtils.createRandomCartWith("cart name");
         val itemAddRequest = ItemAddRequest.withName("item 2");
         val item = Item.from(itemAddRequest);
         given(cartService.addItem(eq(cart.getId()), eq(itemAddRequest))).willReturn(item);
@@ -129,19 +126,5 @@ public class CartControllerTest {
         return post(CARTS_API + "/" + cartId + "/items")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(itemAddRequest));
-    }
-
-    private Cart createRandomCartWith(final String cartName) {
-        return createRandomCartWith(cartName, Collections.emptyList());
-    }
-
-    private Cart createRandomCartWith(final String cartName, List<String> itemNames) {
-        return Cart.builder()
-            .id(UUID.randomUUID())
-            .name(cartName)
-            .items(itemNames.stream()
-                .map(Item::withName)
-                .collect(toList()))
-            .build();
     }
 }

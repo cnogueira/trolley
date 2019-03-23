@@ -8,6 +8,7 @@ import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.cnogueira.trolley.api.v1.exceptions.CartNotFoundException;
 import org.cnogueira.trolley.api.v1.repository.CartRepository;
+import org.cnogueira.trolley.api.v1.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final ItemRepository itemRepository;
 
     public Cart createCart(final CartCreateRequest cartCreateRequest) {
         val cart = Cart.from(cartCreateRequest);

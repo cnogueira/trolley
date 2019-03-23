@@ -1,17 +1,22 @@
 package org.cnogueira.trolley.api.v1.domain;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 
-@Value
+@Getter
 @Builder
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
-public final class Cart {
+public class Cart {
     private final UUID id;
     private final String name;
 
@@ -23,5 +28,8 @@ public final class Cart {
                 .id(UUID.randomUUID())
                 .name(cartCreateRequest.getName())
                 .build();
+    }
+
+    public void addItem(final Item item) {
     }
 }

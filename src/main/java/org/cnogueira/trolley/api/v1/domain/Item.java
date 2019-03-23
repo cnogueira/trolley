@@ -1,14 +1,18 @@
 package org.cnogueira.trolley.api.v1.domain;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import lombok.ToString;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 
 import java.util.UUID;
 
-@Value
+@Getter
 @Builder
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class Item {
     private final UUID id;
