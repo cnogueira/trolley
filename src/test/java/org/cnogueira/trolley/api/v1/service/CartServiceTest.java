@@ -11,7 +11,9 @@ import org.cnogueira.trolley.api.v1.repository.ItemRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
@@ -69,7 +71,7 @@ public class CartServiceTest {
     @Test
     public void getCart_delegatesToRepository_and_SubscribesRepository() {
         // given
-        val cart = TestUtils.createRandomCartWith("some other name");
+        val cart = spy(TestUtils.createRandomCartWith("some other name"));
         given(cartRepository.getById(eq(cart.getId()))).willReturn(Optional.of(cart));
 
         // when
@@ -107,12 +109,13 @@ public class CartServiceTest {
         assertThat(addedItem).isNotNull();
         assertThat(addedItem.getName()).isEqualTo(itemAddRequest.getName());
 
-        verify(cart, times(1))
-            .addItem(argThat(item -> itemAddRequest.getName().equals(item.getName())));
-
         verify(itemRepository, times(1)).addItem(same(addedItem));
 
-        verify(cartRepository, times(1)).stateChanged(same(cart));
+        InOrder orderVerifier = Mockito.inOrder(cart);
+
+        orderVerifier.verify(cart).addStateChangeObserver(same(cartRepository));
+        orderVerifier.verify(cart).addItem(argThat(item -> itemAddRequest.getName().equals(item.getName())));
+        orderVerifier.verifyNoMoreInteractions();
     }
 
     @Test(expected = CartNotFoundException.class)

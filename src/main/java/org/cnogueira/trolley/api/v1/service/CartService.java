@@ -26,14 +26,18 @@ public class CartService {
         val cart = cartFactory.from(cartCreateRequest);
 
         cartRepository.addCart(cart);
-//        cart.addStateChangeObserver(cartRepository);
+        cart.addStateChangeObserver(cartRepository);
 
         return cart;
     }
 
     public Cart getCart(final UUID cartId) {
-        return cartRepository.getById(cartId)
+        val cart = cartRepository.getById(cartId)
                 .orElseThrow(CartNotFoundException::new);
+
+        cart.addStateChangeObserver(cartRepository);
+
+        return cart;
     }
 
     public Item addItem(final UUID cartId, final ItemAddRequest itemAddRequest) {
@@ -42,7 +46,6 @@ public class CartService {
 
         itemRepository.addItem(item);
         cart.addItem(item);
-        cartRepository.replaceCart(cart);
 
         return item;
     }
