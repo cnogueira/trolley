@@ -13,13 +13,34 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 configurations {
+    codacy
     compileOnly {
         extendsFrom annotationProcessor
     }
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
+    main = "com.codacy.CodacyCoverageReporter"
+    classpath = configurations.codacy
+    args = [
+            "report",
+            "-l",
+            "Java",
+            "-r",
+            "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+    ]
+}
+
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url "http://dl.bintray.com/typesafe/maven-releases" }
 }
 
 dependencies {
@@ -36,6 +57,8 @@ dependencies {
 
     testAnnotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok'
+
+    codacy 'com.github.codacy:codacy-coverage-reporter:-SNAPSHOT'
 }
 
 ext {
