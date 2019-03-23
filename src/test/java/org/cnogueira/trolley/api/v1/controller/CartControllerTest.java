@@ -1,18 +1,10 @@
 package org.cnogueira.trolley.api.v1.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.UUID;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
+import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.cnogueira.trolley.api.v1.exceptions.CartNotFoundException;
 import org.cnogueira.trolley.api.v1.service.CartService;
 import org.junit.Test;
@@ -24,6 +16,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CartController.class)
@@ -61,10 +64,7 @@ public class CartControllerTest {
     @Test
     public void getCart_delegatesToCartService() throws Exception {
         // given
-        val cart = Cart.builder()
-                .id(UUID.randomUUID())
-                .name("some name")
-                .build();
+        val cart = createRandomCartWithName("some name");
         given(cartService.getCart(eq(cart.getId()))).willReturn(cart);
 
         // when
@@ -86,5 +86,52 @@ public class CartControllerTest {
 
         // then
         response.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @Test
+    public void addItem_respondsWithHttpNotFoundWhenProvidedCartIdDoesNotExists() throws Exception {
+        // given
+        given(cartService.getCart(any())).willThrow(CartNotFoundException.class);
+        val cartId = UUID.randomUUID();
+        val itemAddRequest = ItemAddRequest.withName("item 1");
+
+        // when
+        val response = mockMvc.perform(addItemPostRequest(cartId, itemAddRequest));
+
+        // then
+        response.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @Test
+    public void addItem_delegatesToCartService() throws Exception {
+        // given
+        val cart = createRandomCartWithName("cart name");
+        given(cartService.getCart(any())).willReturn(cart);
+        val itemAddRequest = ItemAddRequest.withName("item 1");
+
+        // when
+        val response = mockMvc.perform(addItemPostRequest(cart.getId(), itemAddRequest));
+
+        // then
+        response.andExpect(status().is(HttpStatus.CREATED.value()))
+            .andExpect(jsonPath("id").value(eq(cart.getId().toString())))
+            .andExpect(jsonPath("name").value(eq(cart.getName())))
+            .andExpect(jsonPath("items").isArray())
+            .andExpect(jsonPath("items[0].name").isString())
+            .andExpect(jsonPath("items[0].name").value(eq(itemAddRequest.getName())));
+    }
+
+    private MockHttpServletRequestBuilder addItemPostRequest(final UUID cartId,
+                                                             final ItemAddRequest itemAddRequest) throws Exception {
+        return post(CARTS_API + "/" + cartId + "/items")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsString(itemAddRequest));
+    }
+
+    private Cart createRandomCartWithName(final String someName) {
+        return Cart.builder()
+            .id(UUID.randomUUID())
+            .name(someName)
+            .build();
     }
 }
