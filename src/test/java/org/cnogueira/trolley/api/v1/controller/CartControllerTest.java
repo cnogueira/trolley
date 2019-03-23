@@ -3,6 +3,7 @@ package org.cnogueira.trolley.api.v1.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
+import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.cnogueira.trolley.api.v1.exceptions.CartNotFoundException;
@@ -18,8 +19,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -64,7 +69,7 @@ public class CartControllerTest {
     @Test
     public void getCart_delegatesToCartService() throws Exception {
         // given
-        val cart = createRandomCartWithName("some name");
+        val cart = createRandomCartWith("some name");
         given(cartService.getCart(eq(cart.getId()))).willReturn(cart);
 
         // when
@@ -91,7 +96,7 @@ public class CartControllerTest {
     @Test
     public void addItem_respondsWithHttpNotFoundWhenProvidedCartIdDoesNotExists() throws Exception {
         // given
-        given(cartService.getCart(any())).willThrow(CartNotFoundException.class);
+        given(cartService.addItem(any(), any())).willThrow(CartNotFoundException.class);
         val cartId = UUID.randomUUID();
         val itemAddRequest = ItemAddRequest.withName("item 1");
 
@@ -105,20 +110,18 @@ public class CartControllerTest {
     @Test
     public void addItem_delegatesToCartService() throws Exception {
         // given
-        val cart = createRandomCartWithName("cart name");
-        given(cartService.getCart(any())).willReturn(cart);
-        val itemAddRequest = ItemAddRequest.withName("item 1");
+        val cart = createRandomCartWith("cart name", Arrays.asList("item 1", "item 2"));
+        val itemAddRequest = ItemAddRequest.withName("item 2");
+        val item = Item.from(itemAddRequest);
+        given(cartService.addItem(eq(cart.getId()), eq(itemAddRequest))).willReturn(item);
 
         // when
         val response = mockMvc.perform(addItemPostRequest(cart.getId(), itemAddRequest));
 
         // then
         response.andExpect(status().is(HttpStatus.CREATED.value()))
-            .andExpect(jsonPath("id").value(eq(cart.getId().toString())))
-            .andExpect(jsonPath("name").value(eq(cart.getName())))
-            .andExpect(jsonPath("items").isArray())
-            .andExpect(jsonPath("items[0].name").isString())
-            .andExpect(jsonPath("items[0].name").value(eq(itemAddRequest.getName())));
+            .andExpect(jsonPath("id").value(item.getId().toString()))
+            .andExpect(jsonPath("name").value(itemAddRequest.getName()));
     }
 
     private MockHttpServletRequestBuilder addItemPostRequest(final UUID cartId,
@@ -128,10 +131,17 @@ public class CartControllerTest {
                 .content(objectMapper.writeValueAsString(itemAddRequest));
     }
 
-    private Cart createRandomCartWithName(final String someName) {
+    private Cart createRandomCartWith(final String cartName) {
+        return createRandomCartWith(cartName, Collections.emptyList());
+    }
+
+    private Cart createRandomCartWith(final String cartName, List<String> itemNames) {
         return Cart.builder()
             .id(UUID.randomUUID())
-            .name(someName)
+            .name(cartName)
+            .items(itemNames.stream()
+                .map(Item::withName)
+                .collect(toList()))
             .build();
     }
 }
