@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.UUID;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.dto.Cart;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
