@@ -11,4 +11,11 @@ import lombok.Value;
 public final class Cart {
     private final UUID id;
     private final String name;
+
+    public static Cart from(final CartCreateRequest cartCreateRequest) {
+        return Cart.builder()
+                .id(UUID.randomUUID())
+                .name(cartCreateRequest.getName())
+                .build();
+    }
 }
