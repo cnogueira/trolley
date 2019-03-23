@@ -2,7 +2,7 @@ package org.cnogueira.trolley.api.v1.controller;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import org.cnogueira.trolley.api.v1.dto.Cart;
+import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.service.CartService;
 import org.springframework.http.HttpStatus;

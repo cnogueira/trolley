@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.cnogueira.trolley.api.v1.dto.Cart;
+import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.springframework.stereotype.Repository;
 
 @Repository

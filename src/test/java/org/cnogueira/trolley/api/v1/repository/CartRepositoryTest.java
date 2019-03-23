@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
 import lombok.val;
-import org.cnogueira.trolley.api.v1.dto.Cart;
+import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.junit.Before;
 import org.junit.Test;
 
