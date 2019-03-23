@@ -34,6 +34,13 @@ public class CartService {
     }
 
     public Item addItem(final UUID cartId, final ItemAddRequest itemAddRequest) {
-        return null;
+        val cart = getCart(cartId);
+        val item = Item.from(itemAddRequest);
+
+        itemRepository.addItem(item);
+        cart.addItem(item);
+        cartRepository.replaceCart(cart);
+
+        return item;
     }
 }

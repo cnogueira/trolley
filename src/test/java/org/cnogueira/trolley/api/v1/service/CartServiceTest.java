@@ -106,7 +106,7 @@ public class CartServiceTest {
         verify(cart, times(1))
             .addItem(argThat(item -> itemAddRequest.getName().equals(item.getName())));
 
-        verify(itemRepository, times(1)).addItem(same(itemAddRequest));
+        verify(itemRepository, times(1)).addItem(same(addedItem));
 
         verify(cartRepository, times(1)).replaceCart(same(cart));
     }
