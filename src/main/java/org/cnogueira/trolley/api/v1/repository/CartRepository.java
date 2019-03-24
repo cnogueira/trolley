@@ -26,6 +26,6 @@ public class CartRepository {
     }
 
     public void stateChanged(final Cart cart) {
-
+        replaceCart(cart);
     }
 }
