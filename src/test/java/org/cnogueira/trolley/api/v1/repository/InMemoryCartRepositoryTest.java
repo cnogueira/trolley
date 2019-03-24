@@ -5,6 +5,7 @@ import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
+import org.cnogueira.trolley.api.v1.repository.impl.InMemoryCartRepository;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-public class CartRepositoryTest {
+public class InMemoryCartRepositoryTest {
 
     private CartRepository cartRepository;
     private CartFactory cartFactory;
@@ -25,7 +26,7 @@ public class CartRepositoryTest {
     @Before
     public void setUp() {
         cartFactory = CartFactory.create();
-        cartRepository = new CartRepository(cartFactory);
+        cartRepository = new InMemoryCartRepository(cartFactory);
     }
 
     @Test
