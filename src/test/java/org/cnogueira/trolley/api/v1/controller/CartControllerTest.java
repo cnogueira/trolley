@@ -2,10 +2,8 @@ package org.cnogueira.trolley.api.v1.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.cnogueira.trolley.api.v1.TestUtils;
 import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
-import org.cnogueira.trolley.api.v1.domain.factory.impl.DefaultCartFactory;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
 import org.cnogueira.trolley.api.v1.exceptions.CartNotFoundException;
@@ -46,7 +44,7 @@ public class CartControllerTest {
     @MockBean
     private CartService cartService;
 
-    private CartFactory cartFactory = new DefaultCartFactory();
+    private CartFactory cartFactory = CartFactory.create();
 
     @Test
     public void createCart_delegatesToCartService() throws Exception {
@@ -69,7 +67,7 @@ public class CartControllerTest {
     @Test
     public void getCart_delegatesToCartService() throws Exception {
         // given
-        val cart = TestUtils.createRandomCartWith("some name");
+        val cart = cartFactory.with("some name");
         given(cartService.getCart(eq(cart.getId()))).willReturn(cart);
 
         // when
@@ -110,7 +108,7 @@ public class CartControllerTest {
     @Test
     public void addItem_delegatesToCartService() throws Exception {
         // given
-        val cart = TestUtils.createRandomCartWith("cart name");
+        val cart = cartFactory.with("cart name");
         val itemAddRequest = ItemAddRequest.withName("item 2");
         val item = Item.from(itemAddRequest);
         given(cartService.addItem(eq(cart.getId()), eq(itemAddRequest))).willReturn(item);

@@ -1,27 +1,31 @@
 package org.cnogueira.trolley.api.v1.domain;
 
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.cnogueira.trolley.api.v1.repository.CartRepository;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Builder
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
 public class Cart {
+
+    @EqualsAndHashCode.Exclude
+    private final StateChangeNotifier stateChangeNotifier;
+
+    @Getter
     private final UUID id;
+
+    @Getter
     private final String name;
 
-    @Builder.Default
     private final List<Item> items = new ArrayList<>();
 
     public void addItem(final Item item) {

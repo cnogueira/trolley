@@ -2,15 +2,28 @@ package org.cnogueira.trolley.api.v1.domain;
 
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
-import org.cnogueira.trolley.api.v1.domain.factory.impl.DefaultCartFactory;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifierFactory;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CartTest {
 
-    private CartFactory cartFactory = new DefaultCartFactory();
+    @Spy
+    private StateChangeNotifierFactory stateChangeNotifierFactory;
+
+    private CartFactory cartFactory;
+
+    @Before
+    public void setUp() {
+        cartFactory = new CartFactory(stateChangeNotifierFactory);
+    }
 
     @Test
     public void from_CartGetsCreatedWithZeroItems() {
@@ -24,7 +37,7 @@ public class CartTest {
     @Test
     public void withName_CartGetsCreatedWithZeroItems() {
         // when
-        val cart = cartFactory.withName("cart 1");
+        val cart = cartFactory.with("cart 1");
 
         // then
         assertThat(cart.getItems()).isEmpty();
@@ -33,7 +46,7 @@ public class CartTest {
     @Test
     public void addItem() {
         // given
-        val cart = cartFactory.withName("some name");
+        val cart = cartFactory.with("some name");
         val item = Item.withName("item 1");
 
         // when
@@ -47,7 +60,7 @@ public class CartTest {
     @Test
     public void addItem_assertAddItemIsOnlyWayOfModifyingCartItems() {
         // given
-        val cart = cartFactory.withName("some name");
+        val cart = cartFactory.with("some name");
         val item = Item.withName("item 1");
         cart.addItem(item);
         val items = cart.getItems();

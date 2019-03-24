@@ -1,7 +1,7 @@
 package org.cnogueira.trolley.api.v1.service;
 
 import lombok.val;
-import org.cnogueira.trolley.api.v1.TestUtils;
+import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.dto.ItemAddRequest;
@@ -16,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,21 +41,23 @@ public class CartServiceTest {
     private ItemRepository itemRepository;
 
     @Mock
-    private CartFactory cartFactory;
+    private CartFactory cartFactoryMock;
+
+    private CartFactory cartFactory = CartFactory.create();
 
     private CartService cartService;
 
     @Before
     public void setUp() {
-        cartService = new CartService(cartRepository, itemRepository, cartFactory);
+        cartService = new CartService(cartRepository, itemRepository, cartFactoryMock);
     }
 
     @Test
     public void createCart_createsCart_and_AddsItToRepository() {
         // given
         val cartCreateRequest = CartCreateRequest.withName("some name");
-        val cart = spy(TestUtils.createRandomCartWith("some name"));
-        given(cartFactory.from(same(cartCreateRequest))).willReturn(cart);
+        val cart = spy(cartFactory.with("some name"));
+        given(cartFactoryMock.from(same(cartCreateRequest))).willReturn(cart);
 
         // when
         val createdCart = cartService.createCart(cartCreateRequest);
@@ -71,7 +73,7 @@ public class CartServiceTest {
     @Test
     public void getCart_delegatesToRepository_and_SubscribesRepository() {
         // given
-        val cart = spy(TestUtils.createRandomCartWith("some other name"));
+        val cart = spy(cartFactory.with("some other name"));
         given(cartRepository.getById(eq(cart.getId()))).willReturn(Optional.of(cart));
 
         // when
@@ -98,7 +100,7 @@ public class CartServiceTest {
     @Test
     public void addItem_fetchesCart_createsItem_and_updatesCartRepository() {
         // given
-        val cart = spy(TestUtils.createRandomCartWith("cart 1", Collections.singletonList("item 1")));
+        val cart = spy(cartFactory.with("cart 1", singletonList(Item.withName("item 1"))));
         val itemAddRequest = ItemAddRequest.withName("item 2");
         given(cartRepository.getById(eq(cart.getId()))).willReturn(Optional.of(cart));
 

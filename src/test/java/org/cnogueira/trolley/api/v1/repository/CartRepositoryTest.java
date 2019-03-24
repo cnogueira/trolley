@@ -2,21 +2,22 @@ package org.cnogueira.trolley.api.v1.repository;
 
 
 import lombok.val;
-import org.cnogueira.trolley.api.v1.TestUtils;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
+import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 public class CartRepositoryTest {
 
     private CartRepository cartRepository;
+    private CartFactory cartFactory = CartFactory.create();
 
     @Before
     public void setUp() {
@@ -35,7 +36,7 @@ public class CartRepositoryTest {
     @Test
     public void allowsGetByIdAfterAddingIt() {
         // given
-        val cart = TestUtils.createRandomCartWith("some random name");
+        val cart = cartFactory.with("some random name");
 
         // when
         cartRepository.addCart(cart);
@@ -48,12 +49,8 @@ public class CartRepositoryTest {
     @Test
     public void replaceCart_replacesCartById() {
         // given
-        val cart = TestUtils.createRandomCartWith("some random name");
-        val cart2 = Cart.builder()
-            .id(cart.getId())
-            .name("another name")
-            .items(Collections.singletonList(Item.withName("just an item")))
-            .build();
+        val cart = cartFactory.with("some random name");
+        val cart2 = cartFactory.with(cart.getId(), "another name", singletonList(Item.withName("just an item")));
         cartRepository.addCart(cart);
 
         // when
