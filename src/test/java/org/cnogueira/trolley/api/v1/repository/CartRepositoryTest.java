@@ -18,11 +18,12 @@ import static org.assertj.core.api.Assertions.fail;
 public class CartRepositoryTest {
 
     private CartRepository cartRepository;
-    private CartFactory cartFactory = CartFactory.create();
+    private CartFactory cartFactory;
 
     @Before
     public void setUp() {
-        cartRepository = new CartRepository();
+        cartFactory = CartFactory.create();
+        cartRepository = new CartRepository(cartFactory);
     }
 
     @Test

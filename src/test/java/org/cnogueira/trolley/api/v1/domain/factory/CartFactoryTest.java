@@ -16,8 +16,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,7 +115,24 @@ public class CartFactoryTest {
         verifyNewStateChangeNotifierHasBeenCreated();
     }
 
+    @Test
+    public void cloneOf() {
+        // given
+        val cartId = UUID.randomUUID();
+        val cartName = "another name";
+        val items = Arrays.asList(Item.withName("item a"), Item.withName("item b"));
+        val originalCart = cartFactory.with(cartId, cartName, items);
+
+        // when
+        val cart = cartFactory.cloneOf(originalCart);
+
+        // then
+        assertThat(cart).isEqualTo(originalCart);
+        assertThat(cart).isNotSameAs(originalCart);
+        verifyNewStateChangeNotifierHasBeenCreated();
+    }
+
     private void verifyNewStateChangeNotifierHasBeenCreated() {
-        verify(stateChangeNotifierFactory, times(1)).createStateChangeNotifier();
+        verify(stateChangeNotifierFactory, atLeastOnce()).createStateChangeNotifier();
     }
 }

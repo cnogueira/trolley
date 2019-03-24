@@ -43,6 +43,10 @@ public class CartFactory {
         return cart;
     }
 
+    public Cart cloneOf(final Cart cart) {
+        return with(cart.getId(), cart.getName(), cart.getItems());
+    }
+
     private UUID nextCartId() {
         return UUID.randomUUID();
     }
@@ -50,4 +54,5 @@ public class CartFactory {
     public static CartFactory create() {
         return new CartFactory(new StateChangeNotifierFactory());
     }
+
 }
