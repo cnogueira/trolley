@@ -30,6 +30,8 @@ public class Cart {
 
     public void addItem(final Item item) {
         items.add(item);
+
+        stateChangeNotifier.notifyStateChanged(this);
     }
 
     public List<Item> getItems() {

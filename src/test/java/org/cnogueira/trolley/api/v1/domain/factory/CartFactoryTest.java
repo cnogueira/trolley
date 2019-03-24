@@ -3,6 +3,7 @@ package org.cnogueira.trolley.api.v1.domain.factory;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifier;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifierFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -28,6 +31,7 @@ public class CartFactoryTest {
     @Before
     public void setUp() {
         cartFactory = new CartFactory(stateChangeNotifierFactory);
+        given(stateChangeNotifierFactory.createStateChangeNotifier()).willReturn(mock(StateChangeNotifier.class));
     }
 
     @Test

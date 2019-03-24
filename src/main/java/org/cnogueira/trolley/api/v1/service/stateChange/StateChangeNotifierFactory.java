@@ -5,6 +5,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class StateChangeNotifierFactory {
     public StateChangeNotifier createStateChangeNotifier() {
-        return null;
+        return new StateChangeNotifier();
     }
 }
