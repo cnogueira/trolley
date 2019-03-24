@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.cnogueira.trolley.api.v1.repository.CartRepository;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifier;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class Cart {
+public class Cart implements StateChangeObservable {
 
     @EqualsAndHashCode.Exclude
     private final StateChangeNotifier stateChangeNotifier;
