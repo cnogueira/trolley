@@ -61,6 +61,19 @@ public class CartRepositoryTest {
         assertThat(updatedCart).isEqualTo(cart2);
     }
 
+    @Test
+    public void stateChanged_updatesCart() {
+        // given
+        val cart = cartFactory.with("test cart");
+        assertThat(cartRepository.getById(cart.getId())).isEmpty();
+
+        // when
+        cartRepository.stateChanged(cart);
+
+        // then
+        assertThat(cartRepository.getById(cart.getId())).contains(cart);
+    }
+
     private Cart getByIdFromRepositoryOrFail(UUID cartId) {
         val optionalCart = cartRepository.getById(cartId);
 

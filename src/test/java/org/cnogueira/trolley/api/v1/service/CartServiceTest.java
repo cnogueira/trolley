@@ -98,7 +98,7 @@ public class CartServiceTest {
     }
 
     @Test
-    public void addItem_fetchesCart_createsItem_and_updatesCartRepository() {
+    public void addItem_fetchesCart_createsItem_andAddsItemToCart() {
         // given
         val cart = spy(cartFactory.with("cart 1", singletonList(Item.withName("item 1"))));
         val itemAddRequest = ItemAddRequest.withName("item 2");
