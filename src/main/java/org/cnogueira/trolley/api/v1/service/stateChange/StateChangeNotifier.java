@@ -14,4 +14,8 @@ public class StateChangeNotifier {
     public void subscribe(final StateChangeObserver observer) {
         subscribers.add(observer);
     }
+
+    public void unsubscribe(final StateChangeObserver observer) {
+        subscribers.remove(observer);
+    }
 }
