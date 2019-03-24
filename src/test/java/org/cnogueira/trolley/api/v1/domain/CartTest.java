@@ -4,6 +4,7 @@ import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifier;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifierFactory;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObserver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,5 +78,35 @@ public class CartTest {
 
         // when
         verify(stateChangeNotifier, times(1)).notifyStateChanged(same(cart));
+    }
+
+    @Test
+    public void subscribeStateChangeObserver_registersObserverToNotifier() {
+        // given
+        val stateChangeNotifier = mock(StateChangeNotifier.class);
+        given(stateChangeNotifierFactory.createStateChangeNotifier()).willReturn(stateChangeNotifier);
+        val cart = cartFactory.with("cart with StateChangeNotifier spy");
+        val observer = mock(StateChangeObserver.class);
+
+        // then
+        cart.subscribeStateChangeObserver(observer);
+
+        // when
+        verify(stateChangeNotifier, times(1)).subscribe(same(observer));
+    }
+
+    @Test
+    public void unsubscribeStateChangeObserver_unregistersObserverFromNotifier() {
+        // given
+        val stateChangeNotifier = mock(StateChangeNotifier.class);
+        given(stateChangeNotifierFactory.createStateChangeNotifier()).willReturn(stateChangeNotifier);
+        val cart = cartFactory.with("cart with StateChangeNotifier spy");
+        val observer = mock(StateChangeObserver.class);
+
+        // then
+        cart.unsubscribeStateChangeObserver(observer);
+
+        // when
+        verify(stateChangeNotifier, times(1)).unsubscribe(same(observer));
     }
 }

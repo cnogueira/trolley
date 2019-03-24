@@ -4,9 +4,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.cnogueira.trolley.api.v1.repository.CartRepository;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifier;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObserver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +39,13 @@ public class Cart implements StateChangeObservable {
         return Collections.unmodifiableList(items);
     }
 
-    public void addStateChangeObserver(final CartRepository cartRepository) {
+    @Override
+    public void subscribeStateChangeObserver(final StateChangeObserver observer) {
+        stateChangeNotifier.subscribe(observer);
+    }
+
+    @Override
+    public void unsubscribeStateChangeObserver(final StateChangeObserver observer) {
+        stateChangeNotifier.unsubscribe(observer);
     }
 }

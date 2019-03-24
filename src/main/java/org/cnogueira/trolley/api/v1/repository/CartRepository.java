@@ -3,6 +3,8 @@ package org.cnogueira.trolley.api.v1.repository;
 import lombok.RequiredArgsConstructor;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObserver;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -12,7 +14,7 @@ import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
-public class CartRepository {
+public class CartRepository implements StateChangeObserver {
 
     private final CartFactory cartFactory;
     private final Map<UUID, Cart> carts = new HashMap<>();
@@ -30,8 +32,12 @@ public class CartRepository {
         addCart(cart);
     }
 
-    public void stateChanged(final Cart cart) {
-        replaceCart(cart);
-    }
+    @Override
+    public void onStateChanged(final StateChangeObservable emitter) {
+        if (!(emitter instanceof Cart)) {
+            throw new IllegalArgumentException("CartRepository must be subscribed to Cart state changes only");
+        }
 
+        replaceCart((Cart) emitter);
+    }
 }

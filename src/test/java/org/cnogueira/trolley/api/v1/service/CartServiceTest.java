@@ -67,7 +67,7 @@ public class CartServiceTest {
         assertThat(createdCart.getId()).isNotNull();
         assertThat(createdCart.getName()).isEqualTo(cartCreateRequest.getName());
         verify(cartRepository, times(1)).addCart(same(createdCart));
-        verify(cart, times(1)).addStateChangeObserver(same(cartRepository));
+        verify(cart, times(1)).subscribeStateChangeObserver(same(cartRepository));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class CartServiceTest {
         //then
         assertThat(receivedCart).isSameAs(cart);
         verify(cartRepository, times(1)).getById(eq(cart.getId()));
-        verify(cart, times(1)).addStateChangeObserver(same(cartRepository));
+        verify(cart, times(1)).subscribeStateChangeObserver(same(cartRepository));
     }
 
     @Test(expected = CartNotFoundException.class)
@@ -115,7 +115,7 @@ public class CartServiceTest {
 
         InOrder orderVerifier = Mockito.inOrder(cart);
 
-        orderVerifier.verify(cart).addStateChangeObserver(same(cartRepository));
+        orderVerifier.verify(cart).subscribeStateChangeObserver(same(cartRepository));
         orderVerifier.verify(cart).addItem(argThat(item -> itemAddRequest.getName().equals(item.getName())));
         orderVerifier.verifyNoMoreInteractions();
     }

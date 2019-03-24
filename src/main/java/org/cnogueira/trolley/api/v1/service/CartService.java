@@ -26,7 +26,7 @@ public class CartService {
         val cart = cartFactory.from(cartCreateRequest);
 
         cartRepository.addCart(cart);
-        cart.addStateChangeObserver(cartRepository);
+        cart.subscribeStateChangeObserver(cartRepository);
 
         return cart;
     }
@@ -35,7 +35,7 @@ public class CartService {
         val cart = cartRepository.getById(cartId)
                 .orElseThrow(CartNotFoundException::new);
 
-        cart.addStateChangeObserver(cartRepository);
+        cart.subscribeStateChangeObserver(cartRepository);
 
         return cart;
     }

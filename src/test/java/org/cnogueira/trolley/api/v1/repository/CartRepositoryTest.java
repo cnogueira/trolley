@@ -5,6 +5,7 @@ import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 public class CartRepositoryTest {
 
@@ -64,16 +66,28 @@ public class CartRepositoryTest {
     }
 
     @Test
-    public void stateChanged_updatesCart() {
+    public void onStateChanged_updatesCart() {
         // given
         val cart = cartFactory.with("test cart");
         assertThat(cartRepository.getById(cart.getId())).isEmpty();
 
         // when
-        cartRepository.stateChanged(cart);
+        cartRepository.onStateChanged(cart);
 
         // then
         assertThat(cartRepository.getById(cart.getId())).contains(cart);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void onStateChanged_throwsIfCalledWithAnUnknownEmitter() {
+        // given
+        val unknownEmitter = mock(StateChangeObservable.class);
+
+        // when
+        cartRepository.onStateChanged(unknownEmitter);
+
+        // then
+        fail("CartRepository must throw when notified on state changed of something that's not a Cart");
     }
 
     /**
