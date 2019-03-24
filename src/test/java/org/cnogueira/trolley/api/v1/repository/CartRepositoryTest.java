@@ -2,25 +2,30 @@ package org.cnogueira.trolley.api.v1.repository;
 
 
 import lombok.val;
-import org.cnogueira.trolley.api.v1.TestUtils;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
+import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 public class CartRepositoryTest {
 
     private CartRepository cartRepository;
+    private CartFactory cartFactory;
 
     @Before
     public void setUp() {
-        cartRepository = new CartRepository();
+        cartFactory = CartFactory.create();
+        cartRepository = new CartRepository(cartFactory);
     }
 
     @Test
@@ -35,7 +40,7 @@ public class CartRepositoryTest {
     @Test
     public void allowsGetByIdAfterAddingIt() {
         // given
-        val cart = TestUtils.createRandomCartWith("some random name");
+        val cart = cartFactory.with("some random name");
 
         // when
         cartRepository.addCart(cart);
@@ -48,12 +53,8 @@ public class CartRepositoryTest {
     @Test
     public void replaceCart_replacesCartById() {
         // given
-        val cart = TestUtils.createRandomCartWith("some random name");
-        val cart2 = Cart.builder()
-            .id(cart.getId())
-            .name("another name")
-            .items(Collections.singletonList(Item.withName("just an item")))
-            .build();
+        val cart = cartFactory.with("some random name");
+        val cart2 = cartFactory.with(cart.getId(), "another name", singletonList(Item.withName("just an item")));
         cartRepository.addCart(cart);
 
         // when
@@ -62,6 +63,48 @@ public class CartRepositoryTest {
         // then
         val updatedCart = getByIdFromRepositoryOrFail(cart.getId());
         assertThat(updatedCart).isEqualTo(cart2);
+    }
+
+    @Test
+    public void onStateChanged_updatesCart() {
+        // given
+        val cart = cartFactory.with("test cart");
+        assertThat(cartRepository.getById(cart.getId())).isEmpty();
+
+        // when
+        cartRepository.onStateChanged(cart);
+
+        // then
+        assertThat(cartRepository.getById(cart.getId())).contains(cart);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void onStateChanged_throwsIfCalledWithAnUnknownEmitter() {
+        // given
+        val unknownEmitter = mock(StateChangeObservable.class);
+
+        // when
+        cartRepository.onStateChanged(unknownEmitter);
+
+        // then
+        fail("CartRepository must throw when notified on state changed of something that's not a Cart");
+    }
+
+    /**
+     * Necessary to prevent unwanted item "updates" (as otherwise business logic will share same instance)
+     */
+    @Test
+    public void getById_returnsClonedInstance() {
+        // given
+        val originalCart = cartFactory.with("test cart", asList(Item.withName("A"), Item.withName("B")));
+        cartRepository.addCart(originalCart);
+
+        // when
+        val cart = getByIdFromRepositoryOrFail(originalCart.getId());
+
+        //then
+        assertThat(cart).isEqualTo(originalCart);
+        assertThat(cart).isNotSameAs(originalCart);
     }
 
     private Cart getByIdFromRepositoryOrFail(UUID cartId) {

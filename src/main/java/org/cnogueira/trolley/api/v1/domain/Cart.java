@@ -1,49 +1,51 @@
 package org.cnogueira.trolley.api.v1.domain;
 
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifier;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObserver;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Builder
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class Cart {
+public class Cart implements StateChangeObservable {
+
+    @EqualsAndHashCode.Exclude
+    private final StateChangeNotifier stateChangeNotifier;
+
+    @Getter
     private final UUID id;
+
+    @Getter
     private final String name;
 
-    @Builder.Default
     private final List<Item> items = new ArrayList<>();
 
     public void addItem(final Item item) {
         items.add(item);
+
+        stateChangeNotifier.notifyStateChanged(this);
     }
 
     public List<Item> getItems() {
         return Collections.unmodifiableList(items);
     }
 
-    public static Cart withName(final String cartName) {
-        return Cart.builder()
-            .id(UUID.randomUUID())
-            .name(cartName)
-            .build();
+    @Override
+    public void subscribeStateChangeObserver(final StateChangeObserver observer) {
+        stateChangeNotifier.subscribe(observer);
     }
 
-    public static Cart from(final CartCreateRequest cartCreateRequest) {
-        return Cart.builder()
-                .id(UUID.randomUUID())
-                .name(cartCreateRequest.getName())
-                .build();
+    @Override
+    public void unsubscribeStateChangeObserver(final StateChangeObserver observer) {
+        stateChangeNotifier.unsubscribe(observer);
     }
-
 }

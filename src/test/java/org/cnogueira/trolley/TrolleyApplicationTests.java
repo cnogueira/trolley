@@ -1,9 +1,5 @@
 package org.cnogueira.trolley;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
-import java.util.UUID;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
@@ -16,6 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -81,6 +82,32 @@ public class TrolleyApplicationTests {
         assertThat(itemFromResponse.getName()).isEqualTo(requestBody.getName());
 
         assertThat(cartDetails.getItems()).contains(itemFromResponse);
+    }
+
+    @Test
+    public void addedItemsAffectsNextGetCartDetailsRequests() {
+        // given
+        val cart = createCart("Test Cart");
+
+        // when
+        val firstCartDetails = getCartDetails(cart.getId());
+        val item = addItemToCart(cart.getId(), "item 1");
+        val secondCartDetails = getCartDetails(cart.getId());
+
+        // then
+        assertThat(firstCartDetails).isNotEqualTo(secondCartDetails);
+        assertThat(secondCartDetails.getItems()).contains(item);
+    }
+
+    private Item addItemToCart(final UUID cartId, final String itemName) {
+        val addItemUrl = String.format("%s/%s/items", CARTS_API, cartId);
+        val requestBody = ItemAddRequest.withName(itemName);
+
+        val response = restTemplate.postForEntity(addItemUrl, requestBody, Item.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        return response.getBody();
     }
 
     private Cart createCart(final String cartName) {
