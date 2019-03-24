@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -72,6 +73,23 @@ public class CartRepositoryTest {
 
         // then
         assertThat(cartRepository.getById(cart.getId())).contains(cart);
+    }
+
+    /**
+     * Necessary to prevent unwanted item "updates" (as otherwise business logic will share same instance)
+     */
+    @Test
+    public void getById_returnsClonedInstance() {
+        // given
+        val originalCart = cartFactory.with("test cart", asList(Item.withName("A"), Item.withName("B")));
+        cartRepository.addCart(originalCart);
+
+        // when
+        val cart = getByIdFromRepositoryOrFail(originalCart.getId());
+
+        //then
+        assertThat(cart).isEqualTo(originalCart);
+        assertThat(cart).isNotSameAs(originalCart);
     }
 
     private Cart getByIdFromRepositoryOrFail(UUID cartId) {
