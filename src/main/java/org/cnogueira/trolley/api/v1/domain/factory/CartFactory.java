@@ -1,5 +1,6 @@
 package org.cnogueira.trolley.api.v1.domain.factory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
@@ -8,6 +9,7 @@ import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifierFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +19,7 @@ import java.util.UUID;
 public class CartFactory {
 
     private final StateChangeNotifierFactory stateChangeNotifierFactory;
+    private final ObjectMapper objectMapper;
 
     public Cart from(final CartCreateRequest cartCreateRequest) {
         return with(cartCreateRequest.getName());
@@ -52,7 +55,12 @@ public class CartFactory {
     }
 
     public static CartFactory create() {
-        return new CartFactory(new StateChangeNotifierFactory());
+        return new CartFactory(new StateChangeNotifierFactory(), new ObjectMapper());
     }
 
+    public Cart fromJson(final String originalCartAsJson) throws IOException {
+        val deserializedCart = objectMapper.readValue(originalCartAsJson, Cart.class);
+
+        return cloneOf(deserializedCart);
+    }
 }

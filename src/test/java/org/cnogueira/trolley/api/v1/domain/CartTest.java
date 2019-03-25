@@ -1,5 +1,9 @@
 package org.cnogueira.trolley.api.v1.domain;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeNotifier;
@@ -10,6 +14,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.same;
@@ -28,7 +37,7 @@ public class CartTest {
 
     @Before
     public void setUp() {
-        cartFactory = new CartFactory(stateChangeNotifierFactory);
+        cartFactory = new CartFactory(stateChangeNotifierFactory, new ObjectMapper());
     }
 
     @Test
@@ -108,5 +117,45 @@ public class CartTest {
 
         // when
         verify(stateChangeNotifier, times(1)).unsubscribe(same(observer));
+    }
+
+    @Test
+    public void serialize_containsOnlyDomainRelatedFields() throws JsonProcessingException {
+        // given
+        val cart = cartFactory.with("a cart", Collections.singletonList(Item.withName("an item")));
+        val objectMapper = new ObjectMapper();
+        val expectedSerializedObject = objectMapper.writeValueAsString(CartWithSerializableFieldsOnly.from(cart));
+
+        // when
+        val serializedObject = objectMapper.writeValueAsString(cart);
+
+        // then
+        assertThat(serializedObject).isEqualTo(expectedSerializedObject);
+    }
+
+    @Test
+    public void isSerializable() throws IOException {
+        // given
+        val cart = cartFactory.with("a cart", Collections.singletonList(Item.withName("an item")));
+        val objectMapper = new ObjectMapper();
+
+        // when
+        val serializedCart = objectMapper.writeValueAsString(cart);
+        val deserializedCart = objectMapper.readValue(serializedCart, Cart.class);
+
+        // then
+        assertThat(deserializedCart).isEqualTo(cart);
+    }
+
+    @Getter
+    @AllArgsConstructor
+    private static class CartWithSerializableFieldsOnly {
+        private final UUID id;
+        private final String name;
+        private final List<Item> items;
+
+        private static CartWithSerializableFieldsOnly from(final Cart cart) {
+            return new CartWithSerializableFieldsOnly(cart.getId(), cart.getName(), cart.getItems());
+        }
     }
 }

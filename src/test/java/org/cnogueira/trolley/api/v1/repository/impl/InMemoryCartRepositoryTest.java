@@ -1,4 +1,4 @@
-package org.cnogueira.trolley.api.v1.repository;
+package org.cnogueira.trolley.api.v1.repository.impl;
 
 
 import lombok.val;
@@ -17,21 +17,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-public class CartRepositoryTest {
+public class InMemoryCartRepositoryTest {
 
-    private CartRepository cartRepository;
+    private InMemoryCartRepository inMemoryCartRepository;
     private CartFactory cartFactory;
 
     @Before
     public void setUp() {
         cartFactory = CartFactory.create();
-        cartRepository = new CartRepository(cartFactory);
+        inMemoryCartRepository = new InMemoryCartRepository(cartFactory);
     }
 
     @Test
     public void emptyByDefault() {
         // when
-        val optionalCart = cartRepository.getById(UUID.randomUUID());
+        val optionalCart = inMemoryCartRepository.getById(UUID.randomUUID());
 
         //then
         assertThat(optionalCart).isEmpty();
@@ -43,8 +43,8 @@ public class CartRepositoryTest {
         val cart = cartFactory.with("some random name");
 
         // when
-        cartRepository.addCart(cart);
-        val optionalCart = cartRepository.getById(cart.getId());
+        inMemoryCartRepository.addCart(cart);
+        val optionalCart = inMemoryCartRepository.getById(cart.getId());
 
         //then
         assertThat(optionalCart).contains(cart);
@@ -55,10 +55,10 @@ public class CartRepositoryTest {
         // given
         val cart = cartFactory.with("some random name");
         val cart2 = cartFactory.with(cart.getId(), "another name", singletonList(Item.withName("just an item")));
-        cartRepository.addCart(cart);
+        inMemoryCartRepository.addCart(cart);
 
         // when
-        cartRepository.replaceCart(cart2);
+        inMemoryCartRepository.replaceCart(cart2);
 
         // then
         val updatedCart = getByIdFromRepositoryOrFail(cart.getId());
@@ -69,13 +69,13 @@ public class CartRepositoryTest {
     public void onStateChanged_updatesCart() {
         // given
         val cart = cartFactory.with("test cart");
-        assertThat(cartRepository.getById(cart.getId())).isEmpty();
+        assertThat(inMemoryCartRepository.getById(cart.getId())).isEmpty();
 
         // when
-        cartRepository.onStateChanged(cart);
+        inMemoryCartRepository.onStateChanged(cart);
 
         // then
-        assertThat(cartRepository.getById(cart.getId())).contains(cart);
+        assertThat(inMemoryCartRepository.getById(cart.getId())).contains(cart);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -84,7 +84,7 @@ public class CartRepositoryTest {
         val unknownEmitter = mock(StateChangeObservable.class);
 
         // when
-        cartRepository.onStateChanged(unknownEmitter);
+        inMemoryCartRepository.onStateChanged(unknownEmitter);
 
         // then
         fail("CartRepository must throw when notified on state changed of something that's not a Cart");
@@ -97,7 +97,7 @@ public class CartRepositoryTest {
     public void getById_returnsClonedInstance() {
         // given
         val originalCart = cartFactory.with("test cart", asList(Item.withName("A"), Item.withName("B")));
-        cartRepository.addCart(originalCart);
+        inMemoryCartRepository.addCart(originalCart);
 
         // when
         val cart = getByIdFromRepositoryOrFail(originalCart.getId());
@@ -108,7 +108,7 @@ public class CartRepositoryTest {
     }
 
     private Cart getByIdFromRepositoryOrFail(UUID cartId) {
-        val optionalCart = cartRepository.getById(cartId);
+        val optionalCart = inMemoryCartRepository.getById(cartId);
 
         if (!optionalCart.isPresent()) {
             fail("Expected CartRepository to contain a Cart with id: " + cartId);
