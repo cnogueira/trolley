@@ -1,11 +1,10 @@
-package org.cnogueira.trolley.api.v1.repository;
+package org.cnogueira.trolley.api.v1.repository.impl;
 
 
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Cart;
 import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
-import org.cnogueira.trolley.api.v1.repository.impl.InMemoryCartRepository;
 import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,19 +19,19 @@ import static org.mockito.Mockito.mock;
 
 public class InMemoryCartRepositoryTest {
 
-    private CartRepository cartRepository;
+    private InMemoryCartRepository inMemoryCartRepository;
     private CartFactory cartFactory;
 
     @Before
     public void setUp() {
         cartFactory = CartFactory.create();
-        cartRepository = new InMemoryCartRepository(cartFactory);
+        inMemoryCartRepository = new InMemoryCartRepository(cartFactory);
     }
 
     @Test
     public void emptyByDefault() {
         // when
-        val optionalCart = cartRepository.getById(UUID.randomUUID());
+        val optionalCart = inMemoryCartRepository.getById(UUID.randomUUID());
 
         //then
         assertThat(optionalCart).isEmpty();
@@ -44,8 +43,8 @@ public class InMemoryCartRepositoryTest {
         val cart = cartFactory.with("some random name");
 
         // when
-        cartRepository.addCart(cart);
-        val optionalCart = cartRepository.getById(cart.getId());
+        inMemoryCartRepository.addCart(cart);
+        val optionalCart = inMemoryCartRepository.getById(cart.getId());
 
         //then
         assertThat(optionalCart).contains(cart);
@@ -56,10 +55,10 @@ public class InMemoryCartRepositoryTest {
         // given
         val cart = cartFactory.with("some random name");
         val cart2 = cartFactory.with(cart.getId(), "another name", singletonList(Item.withName("just an item")));
-        cartRepository.addCart(cart);
+        inMemoryCartRepository.addCart(cart);
 
         // when
-        cartRepository.replaceCart(cart2);
+        inMemoryCartRepository.replaceCart(cart2);
 
         // then
         val updatedCart = getByIdFromRepositoryOrFail(cart.getId());
@@ -70,13 +69,13 @@ public class InMemoryCartRepositoryTest {
     public void onStateChanged_updatesCart() {
         // given
         val cart = cartFactory.with("test cart");
-        assertThat(cartRepository.getById(cart.getId())).isEmpty();
+        assertThat(inMemoryCartRepository.getById(cart.getId())).isEmpty();
 
         // when
-        cartRepository.onStateChanged(cart);
+        inMemoryCartRepository.onStateChanged(cart);
 
         // then
-        assertThat(cartRepository.getById(cart.getId())).contains(cart);
+        assertThat(inMemoryCartRepository.getById(cart.getId())).contains(cart);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -85,7 +84,7 @@ public class InMemoryCartRepositoryTest {
         val unknownEmitter = mock(StateChangeObservable.class);
 
         // when
-        cartRepository.onStateChanged(unknownEmitter);
+        inMemoryCartRepository.onStateChanged(unknownEmitter);
 
         // then
         fail("CartRepository must throw when notified on state changed of something that's not a Cart");
@@ -98,7 +97,7 @@ public class InMemoryCartRepositoryTest {
     public void getById_returnsClonedInstance() {
         // given
         val originalCart = cartFactory.with("test cart", asList(Item.withName("A"), Item.withName("B")));
-        cartRepository.addCart(originalCart);
+        inMemoryCartRepository.addCart(originalCart);
 
         // when
         val cart = getByIdFromRepositoryOrFail(originalCart.getId());
@@ -109,7 +108,7 @@ public class InMemoryCartRepositoryTest {
     }
 
     private Cart getByIdFromRepositoryOrFail(UUID cartId) {
-        val optionalCart = cartRepository.getById(cartId);
+        val optionalCart = inMemoryCartRepository.getById(cartId);
 
         if (!optionalCart.isPresent()) {
             fail("Expected CartRepository to contain a Cart with id: " + cartId);

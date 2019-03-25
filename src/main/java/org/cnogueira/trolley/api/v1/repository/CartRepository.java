@@ -12,8 +12,16 @@ public interface CartRepository extends StateChangeObserver {
 
     Optional<Cart> getById(UUID cartId);
 
-    void replaceCart(Cart cart);
+    default void replaceCart(final Cart cart) {
+        addCart(cart);
+    }
 
     @Override
-    void onStateChanged(StateChangeObservable emitter);
+    default void onStateChanged(final StateChangeObservable emitter) {
+        if (!(emitter instanceof Cart)) {
+            throw new IllegalArgumentException("CartRepository must be subscribed to Cart state changes only");
+        }
+
+        replaceCart((Cart) emitter);
+    }
 }

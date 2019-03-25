@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.factory.CartFactory;
+import org.cnogueira.trolley.api.v1.service.stateChange.StateChangeObservable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +14,7 @@ import redis.clients.jedis.Jedis;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -102,5 +104,17 @@ public class RedisCartRepositoryTest {
 
         // then
         verify(redisClient, times(1)).set(eq(cart.getId().toString()), eq(serializedCart));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void onStateChanged_throwsIfCalledWithAnUnknownEmitter() {
+        // given
+        val unknownEmitter = mock(StateChangeObservable.class);
+
+        // when
+        redisCartRepository.onStateChanged(unknownEmitter);
+
+        // then
+        fail("CartRepository must throw when notified on state changed of something that's not a Cart");
     }
 }

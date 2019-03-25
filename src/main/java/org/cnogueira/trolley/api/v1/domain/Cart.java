@@ -1,5 +1,6 @@
 package org.cnogueira.trolley.api.v1.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class Cart implements StateChangeObservable {
 
+    @JsonIgnore
+    @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private final StateChangeNotifier stateChangeNotifier;
 
