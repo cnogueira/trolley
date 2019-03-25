@@ -1,5 +1,6 @@
 package org.cnogueira.trolley.api.v1.domain.factory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.cnogueira.trolley.api.v1.domain.Item;
 import org.cnogueira.trolley.api.v1.dto.CartCreateRequest;
@@ -11,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -25,12 +27,14 @@ public class CartFactoryTest {
 
     @Mock
     private StateChangeNotifierFactory stateChangeNotifierFactory;
+    private ObjectMapper objectMapper;
 
     private CartFactory cartFactory;
 
     @Before
     public void setUp() {
-        cartFactory = new CartFactory(stateChangeNotifierFactory);
+        objectMapper = new ObjectMapper();
+        cartFactory = new CartFactory(stateChangeNotifierFactory, objectMapper);
         given(stateChangeNotifierFactory.createStateChangeNotifier()).willReturn(mock(StateChangeNotifier.class));
     }
 
@@ -125,6 +129,24 @@ public class CartFactoryTest {
 
         // when
         val cart = cartFactory.cloneOf(originalCart);
+
+        // then
+        assertThat(cart).isEqualTo(originalCart);
+        assertThat(cart).isNotSameAs(originalCart);
+        verifyNewStateChangeNotifierHasBeenCreated();
+    }
+
+    @Test
+    public void fromJson() throws IOException {
+        // given
+        val cartId = UUID.randomUUID();
+        val cartName = "another name";
+        val items = Arrays.asList(Item.withName("item a"), Item.withName("item b"));
+        val originalCart = cartFactory.with(cartId, cartName, items);
+        val originalCartAsJson = objectMapper.writeValueAsString(originalCart);
+
+        // when
+        val cart = cartFactory.fromJson(originalCartAsJson);
 
         // then
         assertThat(cart).isEqualTo(originalCart);

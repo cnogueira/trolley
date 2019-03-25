@@ -1,10 +1,13 @@
+FROM openjdk:8-jdk as builder
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
+RUN /app/gradlew bootJar
+
 FROM openjdk:8-jdk
-
 MAINTAINER cristofor.nogueira@gmail.com
-
-COPY build/libs/trolley*.jar /opt/trolley.jar
-
-ENTRYPOINT ["/usr/bin/java"]
-CMD ["-jar", "/opt/trolley.jar"]
-
+RUN mkdir /app
+COPY --from=builder /app/build/libs/trolley-*.jar /app/trolley.jar
 EXPOSE 8080
+ENTRYPOINT ["/usr/bin/java"]
+CMD ["-jar", "/app/trolley.jar"]

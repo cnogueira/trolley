@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +37,7 @@ public class CartTest {
 
     @Before
     public void setUp() {
-        cartFactory = new CartFactory(stateChangeNotifierFactory);
+        cartFactory = new CartFactory(stateChangeNotifierFactory, new ObjectMapper());
     }
 
     @Test
@@ -130,6 +131,20 @@ public class CartTest {
 
         // then
         assertThat(serializedObject).isEqualTo(expectedSerializedObject);
+    }
+
+    @Test
+    public void isSerializable() throws IOException {
+        // given
+        val cart = cartFactory.with("a cart", Collections.singletonList(Item.withName("an item")));
+        val objectMapper = new ObjectMapper();
+
+        // when
+        val serializedCart = objectMapper.writeValueAsString(cart);
+        val deserializedCart = objectMapper.readValue(serializedCart, Cart.class);
+
+        // then
+        assertThat(deserializedCart).isEqualTo(cart);
     }
 
     @Getter

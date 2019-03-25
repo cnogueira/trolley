@@ -19,7 +19,7 @@ import redis.clients.jedis.Jedis;
 public class TrolleyApplication {
 
     private static final String PROPERTY_REDIS_URL = "REDIS_URL";
-    private static final String PROPERTY_REDIS_PORT = "REDIS_URL";
+    private static final String PROPERTY_REDIS_PORT = "REDIS_PORT";
     private static final Integer REDIS_DEFAULT_PORT = 6379;
 
     public static void main(String[] args) {
@@ -30,19 +30,23 @@ public class TrolleyApplication {
     @ConditionalOnBean(CartFactory.class)
     CartRepository cartRepository(final Environment environment, final CartFactory cartFactory, final ObjectMapper objectMapper) {
         if (environment.containsProperty(PROPERTY_REDIS_URL)) {
-            return redisCartRepository(environment, objectMapper);
+            return redisCartRepository(environment, cartFactory, objectMapper);
         }
 
         return new InMemoryCartRepository(cartFactory);
     }
 
-    private CartRepository redisCartRepository(final Environment environment, final ObjectMapper objectMapper) {
+    private CartRepository redisCartRepository(final Environment environment, final CartFactory cartFactory, final ObjectMapper objectMapper) {
         val redisUrl = environment.getProperty(PROPERTY_REDIS_URL);
 
         val redisPort = environment.containsProperty(PROPERTY_REDIS_PORT)
             ? Integer.parseInt(environment.getProperty(PROPERTY_REDIS_PORT))
             : REDIS_DEFAULT_PORT;
 
-        return new RedisCartRepository(new Jedis(redisUrl, redisPort), objectMapper);
+        val redisClient = new Jedis(redisUrl, redisPort);
+
+        System.out.println(redisClient.ping());
+
+        return new RedisCartRepository(redisClient, cartFactory, objectMapper);
     }
 }

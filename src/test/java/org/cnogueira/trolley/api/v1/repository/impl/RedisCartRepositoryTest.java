@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import redis.clients.jedis.Jedis;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +30,7 @@ public class RedisCartRepositoryTest {
 
     private Jedis redisClient;
     private ObjectMapper objectMapper;
+    private CartFactory cartFactoryMock;
 
     private RedisCartRepository redisCartRepository;
 
@@ -36,8 +38,9 @@ public class RedisCartRepositoryTest {
     public void setUp() {
         redisClient = mock(Jedis.class);
         objectMapper = spy(ObjectMapper.class);
+        cartFactoryMock = mock(CartFactory.class);
 
-        redisCartRepository = new RedisCartRepository(redisClient, objectMapper);
+        redisCartRepository = new RedisCartRepository(redisClient, cartFactoryMock, objectMapper);
     }
 
     @Test
@@ -54,17 +57,19 @@ public class RedisCartRepositoryTest {
     }
 
     @Test
-    public void getById() throws JsonProcessingException {
+    public void getById() throws IOException {
         // given
         val cart = cartFactory.with("a cart");
         val serializedCart = objectMapper.writeValueAsString(cart);
         given(redisClient.get(eq(cart.getId().toString()))).willReturn(serializedCart);
+        given(cartFactoryMock.fromJson(eq(serializedCart))).willReturn(cart);
 
         // when
         val optionalCart = redisCartRepository.getById(cart.getId());
 
         // then
-        assertThat(optionalCart).contains(cart);
+        assertThat(optionalCart).containsSame(cart);
+        verify(cartFactoryMock, times(1)).fromJson(eq(serializedCart));
     }
 
     @Test
