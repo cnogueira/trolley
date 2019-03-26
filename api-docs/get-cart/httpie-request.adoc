@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ http GET 'http://localhost:8080/api/v1/carts/695f20a8-baa5-4722-965b-9a5085fcb120'
+----

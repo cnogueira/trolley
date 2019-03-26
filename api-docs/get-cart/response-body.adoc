@@ -1,0 +1,4 @@
+[source,options="nowrap"]
+----
+{"id":"695f20a8-baa5-4722-965b-9a5085fcb120","name":"some name","items":[]}
+----

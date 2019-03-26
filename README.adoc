@@ -1,0 +1,47 @@
+[![Build Status](https://travis-ci.com/cnogueira/trolley.svg?branch=master)](https://travis-ci.com/cnogueira/trolley) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5a878d3468a74227a94300395a6dfdb3)](https://www.codacy.com/app/cnogueira_2/trolley?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cnogueira/trolley&amp;utm_campaign=Badge_Grade)
+
+= Trolley
+
+Yet Another Cart Manager application
+
+
+==== Tests
+Run tests with
+```
+./gradlew clean check
+```
+
+=== Run in docker
+
+```
+docker-compose up --build
+```
+Will deploy the application on port 8080 of localhost.
+
+=== Documentation
+
+Examples assume the application is reachable on http://localhost:8080
+
+==== Create Cart
+
+.request
+include::api-docs/create-cart/http-request.adoc[]
+
+.response
+include::api-docs/create-cart/http-response.adoc[]
+
+==== Get Cart
+
+.request
+include::api-docs/create-cart/http-request.adoc[]
+
+.response
+include::api-docs/create-cart/http-response.adoc[]
+
+==== Add Item
+
+.request
+include::api-docs/add-item/http-request.adoc[]
+
+.response
+include::api-docs/add-item/http-response.adoc[]

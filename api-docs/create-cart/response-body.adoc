@@ -1,0 +1,4 @@
+[source,options="nowrap"]
+----
+{"id":"f67ff566-4921-44e2-a9fe-d95f04a0a936","name":"cart 1","items":[]}
+----

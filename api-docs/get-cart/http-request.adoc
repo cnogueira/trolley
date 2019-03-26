@@ -1,0 +1,6 @@
+[source,http,options="nowrap"]
+----
+GET /api/v1/carts/695f20a8-baa5-4722-965b-9a5085fcb120 HTTP/1.1
+Host: localhost:8080
+
+----

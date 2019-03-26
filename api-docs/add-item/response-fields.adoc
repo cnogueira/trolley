@@ -1,0 +1,12 @@
+|===
+|Path|Type|Description
+
+|`+id+`
+|`+String+`
+|Id of the created item
+
+|`+name+`
+|`+String+`
+|Name of the item
+
+|===

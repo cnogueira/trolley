@@ -1,0 +1,16 @@
+|===
+|Path|Type|Description
+
+|`+id+`
+|`+String+`
+|Id of the created cart
+
+|`+name+`
+|`+String+`
+|Name of the created cart
+
+|`+items+`
+|`+Array+`
+|List of items included in this cart
+
+|===

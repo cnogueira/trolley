@@ -1,0 +1,9 @@
+[source,http,options="nowrap"]
+----
+POST /api/v1/carts/5ac1d550-6bae-4fd1-a391-8c4e9826c5e6/items HTTP/1.1
+Content-Length: 17
+Content-Type: application/json;charset=UTF-8
+Host: localhost:8080
+
+{"name":"item 2"}
+----
