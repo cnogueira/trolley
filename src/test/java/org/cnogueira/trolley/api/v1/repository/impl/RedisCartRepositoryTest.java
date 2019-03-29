@@ -126,9 +126,9 @@ public class RedisCartRepositoryTest {
     }
 
     @Test(expected = Exception.class)
-    public void addCart_throwsIfRedisClientThrows() {
+    public void addCart_throwsIfRedisClientThrows() throws JsonProcessingException {
         // given
-        given(redisClient.set(anyString(), any())).willThrow(mock(JsonProcessingException.class));
+        given(objectMapper.writeValueAsString(any())).willThrow(mock(JsonProcessingException.class));
 
         // when
         redisCartRepository.addCart(cartFactory.with("some cart"));
@@ -138,14 +138,15 @@ public class RedisCartRepositoryTest {
     }
 
     @Test(expected = Exception.class)
-    public void getById_throwsIfRedisClientThrows() {
+    public void getById_throwsIfRedisClientThrows() throws IOException {
         // given
-        given(redisClient.get(anyString())).willThrow(mock(JsonProcessingException.class));
+        given(redisClient.get(anyString())).willReturn("some serialized content");
+        given(cartFactoryMock.fromJson(anyString())).willThrow(mock(IOException.class));
 
         // when
         redisCartRepository.getById(UUID.randomUUID());
 
         // then
-        fail("RedisCartRepository must throw when redis client throws");
+        fail("RedisCartRepository must throw when fails to deserialize objects");
     }
 }
