@@ -96,9 +96,9 @@ Content-Type: application/json;charset=UTF-8
 
 ==== Improvements
 
-- Make `RedisCartRepository` a cache for a proper persistence based repository (e.g. a cart repository based on PostgreSQL).
+- Make `RedisCartRepository` a cache, and use a proper persistence based repository (e.g. a cart repository based on PostgreSQL).
   As that should be transparent to `RedisService`, I'd make `RedisCartRepository` use a decorator pattern to hide the fact
   that it acts as a cache from its consumers.
 - Provide `DELETE` functionality, specifically for items added in a cart.
-- Clean-up configuration: Right now RedisClientRepository is injected if a `REDIS_URL` environment variable is present.
+- Clean-up configuration: Right now `RedisCartRepository` is injected if a `REDIS_URL` environment variable is present.
   That clearly should be moved to configuration files (i.e. `application.properties` file).
