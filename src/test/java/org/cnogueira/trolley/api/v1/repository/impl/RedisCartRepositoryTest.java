@@ -16,6 +16,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -121,5 +123,29 @@ public class RedisCartRepositoryTest {
 
         // then
         fail("CartRepository must throw when notified on state changed of something that's not a Cart");
+    }
+
+    @Test(expected = Exception.class)
+    public void addCart_throwsIfRedisClientThrows() {
+        // given
+        given(redisClient.set(anyString(), any())).willThrow(mock(JsonProcessingException.class));
+
+        // when
+        redisCartRepository.addCart(cartFactory.with("some cart"));
+
+        // then
+        fail("RedisCartRepository must throw when redis client throws");
+    }
+
+    @Test(expected = Exception.class)
+    public void getById_throwsIfRedisClientThrows() {
+        // given
+        given(redisClient.get(anyString())).willThrow(mock(JsonProcessingException.class));
+
+        // when
+        redisCartRepository.getById(UUID.randomUUID());
+
+        // then
+        fail("RedisCartRepository must throw when redis client throws");
     }
 }
